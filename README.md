@@ -1,7 +1,7 @@
 # **Turathi App**	
 
 <img width="1426" alt="Screenshot 2024-05-24 at 6 01 10 PM" src="https://github.com/MiralDalayka/turathi/assets/162041062/d46930b6-6fef-436e-a8a6-6bcae6690a25">
-
+https://drive.google.com/file/d/12hOtPPzLxnGHda19eCSgCVicnvgGLL97/view?usp=sharing
 ## **Problem**
 Many travelers, both local and international, often overlook lesser-known places in Jordanian cities because there isn't enough easy-to-find information about them.
 The main issue is that people who want to explore something face a problem because they must deal with a confusing mix of information from different sources.
