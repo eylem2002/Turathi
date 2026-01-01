@@ -38,22 +38,21 @@ class QuestionService {
     }).catchError((error) {
       log(error.toString());
     });
-    Map<String, dynamic> data = {};
-    QuestionModel tempModel;
     QuestionList questionList = QuestionList(questions: []);
-    for (var item in questionsData.docs) {
-      data["id"] = item.get("id");
-      data["title"] = item.get("title");
-      data["questionTxt"] = item.get("questionTxt");
-      data["writer"] = item.get("writer");
-
-      tempModel = QuestionModel.fromJson(data);
-      // get the images from FirebaseStorage and assign them to the images list
-      tempModel.images = await _filesStorageService.getImages(
-          imageType: ImageType.questionImages.name, folderName: tempModel.id!);
-
-      questionList.questions.add(tempModel);
-    }
+    final fetchedQuestions =
+        await Future.wait(questionsData.docs.map((item) async {
+      final data = item.data() as Map<String, dynamic>;
+      var images = (data["images"] as List?)?.cast<String>() ?? [];
+      if (images.isEmpty) {
+        images = await _filesStorageService.getImages(
+            imageType: ImageType.questionImages.name,
+            folderName: data["id"] ?? '');
+        item.reference.update({"images": images});
+      }
+      data["images"] = images;
+      return QuestionModel.fromJson(data);
+    }));
+    questionList.questions.addAll(fetchedQuestions);
 
     return questionList;
   }

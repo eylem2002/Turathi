@@ -19,20 +19,20 @@ class QuestionModel {
 //This is a factory Constructor to create QuestionModel instance from JSON obj
   QuestionModel.fromJson(Map<String, dynamic> json) {
     id = json['id'];
-
     title = json['title'];
     questionTxt = json['questionTxt'];
     writerName = json['writer'];
+    images = (json['images'] as List?)?.cast<String>() ?? [];
   }
 
 //convert the QuestionModel instance to a JSON object
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['id'] = this.id;
-
     data['title'] = this.title;
     data['questionTxt'] = this.questionTxt;
     data['writer'] = this.writerName;
+    data['images'] = this.images ?? [];
     return data;
   }
 }

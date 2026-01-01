@@ -41,6 +41,7 @@ class EventModel {
     latitude = json['latitude'];
     ticketPrice = json['ticketPrice'];
     creatorName = json['creatorName'];
+    images = (json['images'] as List?)?.cast<String>() ?? [];
 
   }
 
@@ -56,6 +57,7 @@ class EventModel {
     data['latitude'] = this.latitude;
     data['ticketPrice'] = this.ticketPrice;
     data['creatorName'] = this.creatorName;
+    data['images'] = this.images ?? [];
 
     return data;
   }

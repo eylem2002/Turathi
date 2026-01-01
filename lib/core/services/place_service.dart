@@ -18,7 +18,7 @@ class PlaceService {
         .uploadImages(
             imageType: ImageType.placesImages.name,
             folderName: model.placeId!,
-            pickedImages: images!)
+            pickedImages: images)
         .whenComplete(() {
       _fireStore
           .collection(_collectionName)
@@ -54,34 +54,23 @@ class PlaceService {
     }).catchError((error) {
       log(error.toString());
     });
-    //map to store docs data in
-    Map<String, dynamic> data = {};
-    //temp model
-    PlaceModel tempModel;
-    //temp list
-    PlaceList placeList = PlaceList(places: []);
-    for (var item in placesData.docs) {
-      data["placeId"] = item.get("placeId");
-      data["userId"] = item.get("userId");
-      data["state"] = item.get("state");
-      data["address"] = item.get("address");
-      data["status"] = item.get("status");
-      data["description"] = item.get("description");
-      data["title"] = item.get("title");
-      data["latitude"] = item.get("latitude");
-      data["longitude"] = item.get("longitude");
-      data["isVisible"] = item.get("isVisible");
-      data["like"] = item.get("like");
-      data["likesList"] = item.get("likesList");
-      tempModel = PlaceModel.fromJson(data);
-      // get the images from FirebaseStorage and assign them to the images list
-      tempModel.images = await _filesStorageService.getImages(
-          imageType: ImageType.placesImages.name,
-          folderName: tempModel.placeId!);
+    final places = await Future.wait(placesData.docs.map((item) async {
+      final data = item.data() as Map<String, dynamic>;
+      data["placeId"] ??= item.get("placeId");
+      var images = (data["images"] as List?)?.cast<String>() ?? [];
+      if (images.isEmpty) {
+        images = await _filesStorageService.getImages(
+            imageType: ImageType.placesImages.name,
+            folderName: data["placeId"]);
+        // persist urls so we don't hit Storage next time
+        item.reference.update({"images": images});
+      }
+      data["images"] = images;
 
-      placeList.places.add(tempModel);
-    }
-    return placeList;
+      return PlaceModel.fromJson(data);
+    }));
+
+    return PlaceList(places: places);
   }
 
   // update place data in database
@@ -162,9 +151,13 @@ class PlaceService {
 
     tempModel = PlaceModel.fromJson(data);
     // get the images from FirebaseStorage and assign them to the images list
-
-    tempModel.images = tempModel.images = await _filesStorageService.getImages(
-        imageType: ImageType.placesImages.name, folderName: tempModel.placeId!);
+    if (tempModel.images == null || tempModel.images!.isEmpty) {
+      tempModel.images = await _filesStorageService.getImages(
+          imageType: ImageType.placesImages.name,
+          folderName: tempModel.placeId!);
+      // cache back into Firestore to avoid future storage hits
+      await placeData.docs.first.reference.update({"images": tempModel.images});
+    }
 
     return tempModel;
   }

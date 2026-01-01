@@ -37,14 +37,19 @@ class EventService {
         .get();
     EventModel tempModel;
     EventList eventList = EventList(events: []);
-    for (var item in eventsData.docs) {
-      tempModel = EventModel.fromJson(item.data() as Map<String, dynamic>);
-
-      tempModel.images = await _filesStorageService.getImages(
-          imageType: ImageType.eventImages.name, folderName: tempModel.id!);
-
-      eventList.events.add(tempModel);
-    }
+    final fetchedEvents = await Future.wait(eventsData.docs.map((item) async {
+      final data = item.data() as Map<String, dynamic>;
+      var images = (data["images"] as List?)?.cast<String>() ?? [];
+      if (images.isEmpty) {
+        images = await _filesStorageService.getImages(
+            imageType: ImageType.eventImages.name,
+            folderName: data["id"] ?? '');
+        item.reference.update({"images": images});
+      }
+      data["images"] = images;
+      return EventModel.fromJson(data);
+    }));
+    eventList.events.addAll(fetchedEvents);
     log(eventList.events.length.toString());
 
     return eventList;
@@ -63,14 +68,19 @@ class EventService {
     });
     EventModel tempModel;
     EventList eventList = EventList(events: []);
-    for (var item in eventsData.docs) {
-      tempModel = EventModel.fromJson(item.data() as Map<String, dynamic>);
-
-      // get the images urls and assign it to images list in event model
-      tempModel.images = await _filesStorageService.getImages(
-          imageType: ImageType.eventImages.name, folderName: tempModel.id!);
-      eventList.events.add(tempModel);
-    }
+    final fetchedEvents = await Future.wait(eventsData.docs.map((item) async {
+      final data = item.data() as Map<String, dynamic>;
+      var images = (data["images"] as List?)?.cast<String>() ?? [];
+      if (images.isEmpty) {
+        images = await _filesStorageService.getImages(
+            imageType: ImageType.eventImages.name,
+            folderName: data["id"] ?? '');
+        item.reference.update({"images": images});
+      }
+      data["images"] = images;
+      return EventModel.fromJson(data);
+    }));
+    eventList.events.addAll(fetchedEvents);
 
     return eventList;
   }
