@@ -61,4 +61,16 @@ post_install do |installer|
 
     flutter_additional_ios_build_settings(target)
   end
+
+  # Patch gRPC pod sources to drop erroneous 'template' qualifier
+  [
+    'Pods/gRPC-Core/src/core/lib/promise/detail/basic_seq.h',
+    'Pods/gRPC-C++/src/core/lib/promise/detail/basic_seq.h'
+  ].each do |path|
+    full_path = File.join(installer.sandbox.root, '..', path)
+    next unless File.exist?(full_path)
+    contents = File.read(full_path)
+    fixed = contents.gsub('Traits::template CallSeqFactory', 'Traits::CallSeqFactory')
+    File.write(full_path, fixed) if contents != fixed
+  end
 end

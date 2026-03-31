@@ -33,7 +33,7 @@ class QuestionService {
 // get questions from database
   Future<QuestionList> getQuestions() async {
     QuerySnapshot questionsData =
-        await _fireStore.collection(_collectionName).get().whenComplete(() {
+        await _fireStore.collection(_collectionName).limit(50).get().whenComplete(() {
       log("questions done");
     }).catchError((error) {
       log(error.toString());

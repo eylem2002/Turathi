@@ -48,6 +48,7 @@ class PlaceService {
         .collection(_collectionName)
         .where('isVisible', isEqualTo: true) // return only the visible places
         .orderBy('like', descending: true) // order the list by the number of likes
+        .limit(50)
         .get()
         .whenComplete(() {
       log("getPlaces done");

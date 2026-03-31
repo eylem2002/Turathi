@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:turathi/core/data_layer.dart';
 import 'package:turathi/view/view_layer.dart';
 
@@ -15,12 +16,16 @@ class PopularPlaceWidget extends StatelessWidget {
         Navigator.of(context)
             .pushNamed(placeDetailsRoute, arguments: placeModel);
       },
-      child: Image.network(
-        placeModel.images![0] != null && placeModel.images![0].isNotEmpty
-            ? placeModel.images![0]
-//if there is an image null or any problem of the connection (waitting the image to load) then show this image
+      child: CachedNetworkImage(
+        imageUrl: placeModel.images!.isNotEmpty
+            ? placeModel.images!.first
             : 'https://developers.google.com/static/maps/documentation/maps-static/images/error-image-generic.png?hl=ar',
         fit: BoxFit.cover,
+        placeholder: (context, _) => Container(
+          color: Colors.grey.shade200,
+          child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+        ),
+        errorWidget: (_, __, ___) => const Icon(Icons.broken_image),
       ),
     );
   }

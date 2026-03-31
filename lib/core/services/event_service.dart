@@ -60,6 +60,7 @@ class EventService {
     QuerySnapshot eventsData = await _fireStore
         .collection(_collectionName)
         .where("date", isGreaterThan: DateTime.now())
+        .limit(50)
         .get()
         .whenComplete(() {
       log("get events done");
